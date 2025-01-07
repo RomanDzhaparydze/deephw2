@@ -83,7 +83,13 @@ class Trainer(abc.ABC):
             #  - Use the train/test_epoch methods.
             #  - Save losses and accuracies in the lists above.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            training_results = self.train_epoch(dl_train, **kw)
+            train_loss.append(sum(training_results.losses) /  len(training_results.losses)) # average loss
+            train_acc.append(training_results.accuracy)
+            test_results = self.test_epoch(dl_test, **kw)
+            test_loss.append(sum(test_results.losses) /  len(test_results.losses)) # average loss
+            test_acc.append(test_results.accuracy)
+            actual_num_epochs += 1
             # ========================
 
             # TODO:
@@ -92,13 +98,18 @@ class Trainer(abc.ABC):
             #  - Optional: Implement checkpoints. You can use the save_checkpoint
             #    method on this class to save the model to the file specified by
             #    the checkpoints argument.
-            if best_acc is None or test_result.accuracy > best_acc:
+            if best_acc is None or test_results.accuracy > best_acc:
                 # ====== YOUR CODE: ======
-                raise NotImplementedError()
+                best_acc = test_results.accuracy
+                epochs_without_improvement = 0
+                if checkpoints is not None:
+                    self.save_checkpoint(checkpoints)
                 # ========================
             else:
                 # ====== YOUR CODE: ======
-                raise NotImplementedError()
+                epochs_without_improvement += 1
+                if early_stopping and epochs_without_improvement >= early_stopping:
+                    break
                 # ========================
 
         return FitResult(actual_num_epochs, train_loss, train_acc, test_loss, test_acc)
@@ -286,7 +297,10 @@ class ClassifierTrainer(Trainer):
 class LayerTrainer(Trainer):
     def __init__(self, model, loss_fn, optimizer):
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        super().__init__(model)
+        self.model = model
+        self.loss_fn = loss_fn
+        self.optimizer = optimizer
         # ========================
 
     def train_batch(self, batch) -> BatchResult:
@@ -299,7 +313,17 @@ class LayerTrainer(Trainer):
         #  - Calculate number of correct predictions (make sure it's an int,
         #    not a tensor) as num_correct.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        X = X.view(X.shape[0], -1)
+        prediction_results = self.model.forward(X)
+        loss = self.loss_fn.forward(prediction_results, y)
+        self.optimizer.zero_grad()
+        loss_grad = self.loss_fn.backward()
+        self.model.backward(loss_grad)
+        self.optimizer.step()
+        predicted_labels = prediction_results.argmax(dim=1)
+        # print(f'prediction results = {prediction_results}, predicted_labels = {predicted_labels}, y = {y}')
+        num_correct = (predicted_labels == y).sum().item()
+        loss = loss.item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -309,7 +333,12 @@ class LayerTrainer(Trainer):
 
         # TODO: Evaluate the Layer model on one batch of data.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        X = X.view(X.shape[0], -1)
+        prediction_results = self.model.forward(X)
+        loss = self.loss_fn.forward(prediction_results, y)
+        predicted_labels = prediction_results.argmax(dim=1)
+        num_correct = (predicted_labels == y).sum().item()
+        loss = loss.item()
         # ========================
 
         return BatchResult(loss, num_correct)
