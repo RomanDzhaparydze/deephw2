@@ -358,7 +358,6 @@ class Dropout(Layer):
         self.p = p
 
     def forward(self, x, **kw):
-        print(f'x - {x}')
 
         # TODO: Implement the dropout forward pass.
         #  Notice that contrary to previous layers, this layer behaves
@@ -366,10 +365,7 @@ class Dropout(Layer):
         # ====== YOUR CODE: ======
         if self.training_mode:
             mask = (torch.rand_like(x) > self.p).float()
-            # print(f'mask - {mask}')
-            # print(f'x - {x}')
-            # assert torch.all(x == 0)
-            # print(f'x*mask - {x*mask}')
+
             out = x * mask / (1 - self.p)
             self.grad_cache["mask"] = mask
         else:
@@ -505,8 +501,8 @@ class MLP(Layer):
                 layers.append(ReLU())
             elif activation == "sigmoid":
                 layers.append(Sigmoid())
-            # if dropout > 0:
-            #     layers.append(Dropout(dropout))
+            if dropout > 0:
+                layers.append(Dropout(dropout))
             curr_in_features = hidden_feature_count
         layers.append(Linear(curr_in_features, num_classes))
         # ========================
