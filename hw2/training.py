@@ -208,7 +208,7 @@ class Trainer(abc.ABC):
             for batch_idx in range(num_batches):
                 data = next(dl_iter)
                 batch_res = forward_fn(data)
-
+                
                 pbar.set_description(f"{pbar_name} ({batch_res.loss:.3f})")
                 pbar.update()
 

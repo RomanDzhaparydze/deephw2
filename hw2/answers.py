@@ -62,12 +62,18 @@ def part2_optim_hp():
     # TODO: Tweak the hyperparameters to get the best results you can.
     # You may want to use different learning rates for each optimizer.
     # ====== YOUR CODE: ======
-    wstd = 0.125
-    lr_vanilla = 0.045
-    lr_momentum = 0.1
-    lr_rmsprop = 0.1
-    reg = 0.029
+    wstd = 0.1
+    lr_vanilla = 0.1
+    lr_momentum = 0.0075
+    lr_rmsprop = 0.00015
+    reg = 0.0001
 
+    # wstd = 0.1
+    # lr_vanilla = 0.03
+    # lr_momentum = 0.1
+    # lr_rmsprop = 0.1
+    # reg = 0.001
+    
     # ========================
     return dict(
         wstd=wstd,
@@ -86,7 +92,8 @@ def part2_dropout_hp():
     # TODO: Tweak the hyperparameters to get the model to overfit without
     # dropout.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    wstd = 0.1
+    lr = 0.0075
     # ========================
     return dict(wstd=wstd, lr=lr)
 

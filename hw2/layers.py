@@ -83,6 +83,7 @@ class LeakyReLU(Layer):
         # TODO: Implement the LeakyReLU operation.
         # ====== YOUR CODE: ======
         out = torch.where(x > 0, x, self.alpha * x) # only if x is positive, then alpha*x > x
+
         # ========================
         self.grad_cache["x"] = x
         return out
@@ -357,11 +358,22 @@ class Dropout(Layer):
         self.p = p
 
     def forward(self, x, **kw):
+        print(f'x - {x}')
+
         # TODO: Implement the dropout forward pass.
         #  Notice that contrary to previous layers, this layer behaves
         #  differently a according to the current training_mode (train/test).
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        if self.training_mode:
+            mask = (torch.rand_like(x) > self.p).float()
+            # print(f'mask - {mask}')
+            # print(f'x - {x}')
+            # assert torch.all(x == 0)
+            # print(f'x*mask - {x*mask}')
+            out = x * mask / (1 - self.p)
+            self.grad_cache["mask"] = mask
+        else:
+            out = x
         # ========================
 
         return out
@@ -369,7 +381,11 @@ class Dropout(Layer):
     def backward(self, dout):
         # TODO: Implement the dropout backward pass.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        if self.training_mode:
+            mask = self.grad_cache["mask"]
+            dx = dout * mask / (1 - self.p)
+        else:
+            dx = dout
         # ========================
 
         return dx
@@ -489,6 +505,8 @@ class MLP(Layer):
                 layers.append(ReLU())
             elif activation == "sigmoid":
                 layers.append(Sigmoid())
+            # if dropout > 0:
+            #     layers.append(Dropout(dropout))
             curr_in_features = hidden_feature_count
         layers.append(Linear(curr_in_features, num_classes))
         # ========================
