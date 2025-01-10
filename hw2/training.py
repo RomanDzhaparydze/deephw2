@@ -268,7 +268,16 @@ class ClassifierTrainer(Trainer):
         #  - Update parameters
         #  - Classify and calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        # X = X.view(X.shape[0], -1)
+        self.model.train()
+        prediction_results = self.model(X)
+        loss = self.loss_fn(prediction_results, y)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        predicted_labels = prediction_results.argmax(dim=1)
+        num_correct = (predicted_labels == y).sum().item()
+        batch_loss = loss.item()
         # ========================
 
         return BatchResult(batch_loss, num_correct)
@@ -288,7 +297,13 @@ class ClassifierTrainer(Trainer):
             #  - Forward pass
             #  - Calculate number of correct predictions
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            # X = X.view(X.shape[0], -1)
+            prediction_results = self.model(X)
+            loss = self.loss_fn(prediction_results, y)
+
+            predicted_labels = prediction_results.argmax(dim=1)
+            num_correct = (predicted_labels == y).sum().item()
+            batch_loss = loss.item()
             # ========================
 
         return BatchResult(batch_loss, num_correct)
@@ -321,7 +336,6 @@ class LayerTrainer(Trainer):
         self.model.backward(loss_grad)
         self.optimizer.step()
         predicted_labels = prediction_results.argmax(dim=1)
-        # print(f'prediction results = {prediction_results}, predicted_labels = {predicted_labels}, y = {y}')
         num_correct = (predicted_labels == y).sum().item()
         loss = loss.item()
         # ========================

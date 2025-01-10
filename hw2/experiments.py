@@ -1,4 +1,5 @@
 import os
+from re import T
 import sys
 import json
 import torch
@@ -71,6 +72,14 @@ def cnn_experiment(
     hidden_dims=[1024],
     model_type="cnn",
     # You can add extra configuration for your experiments here
+    activation_type="relu",
+    activation_params={},
+    # activation_params={"negative_slope": 0.01},
+    conv_params={"kernel_size": 3, "stride": 1, "padding": 1},
+    pooling_type="avg",
+    pooling_params={"kernel_size": 2, "stride": 2},
+    batchnorm=True,
+    dropout=0.2,
     **kw,
 ):
     """
@@ -107,7 +116,48 @@ def cnn_experiment(
     #   for you automatically.
     fit_res = None
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+
+    common_params = {
+    "in_size": (3, 32, 32),
+    "out_classes": 10,
+    "channels": [f for k in filters_per_layer for f in [k] * layers_per_block],
+    "pool_every": pool_every,
+    "hidden_dims": hidden_dims,
+    "conv_params": conv_params,
+    "activation_type": activation_type,
+    "activation_params": activation_params,
+    "pooling_type": pooling_type,
+    "pooling_params": pooling_params,
+    }
+
+    if model_type == "cnn":
+        model = model_cls(**common_params).to(device)
+    else:
+        model = model_cls(**common_params, batchnorm=batchnorm, dropout=0.2).to(device)
+
+
+    # Define the loss function
+    criterion = torch.nn.CrossEntropyLoss()
+
+    # Create the optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=reg)
+
+    # Prepare data loaders
+    train_loader = DataLoader(ds_train, batch_size=bs_train, shuffle=True)
+    test_loader = DataLoader(ds_test, batch_size=bs_test, shuffle=False)
+
+    # Initialize the trainer
+    trainer = ClassifierTrainer(model, criterion, optimizer, device)
+
+    # Train the model
+    fit_res = trainer.fit(
+        dl_train=train_loader,
+        dl_test=test_loader,
+        num_epochs=epochs,
+        checkpoints=checkpoints,
+        early_stopping=early_stopping,
+        max_batches=batches
+    )
     # ========================
 
     save_experiment(run_name, out_dir, cfg, fit_res)
@@ -244,6 +294,13 @@ def parse_cli():
         default="cnn",
         help="Which model instance to create",
     )
+    # sp_exp.add_argument(
+    #     "--conv-params",
+    #     type=str,
+    #     help="Convolution layer parameters (e.g., kernel_size=3 stride=1 padding=1)",
+    #     default=None
+# )
+
 
     parsed = p.parse_args()
 
