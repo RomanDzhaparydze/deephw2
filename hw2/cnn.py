@@ -226,7 +226,11 @@ class ResidualBlock(nn.Module):
         layers = []
         for i, (out_channels, kernel_size) in enumerate(zip(channels, kernel_sizes)):
             layers.append(nn.Conv2d(in_channels, out_channels,kernel_size=kernel_size, stride=1,
+<<<<<<< HEAD
                 padding=(kernel_size) // 2, # to preserve the spatial extent
+=======
+                padding=(kernel_size - 1) // 2, # to preserve the spatial extent
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
                 bias=True
             ))
             if i < total_convs - 1: # we want the last layer to be a convolution layer
@@ -345,20 +349,145 @@ class ResNet(CNN):
         #    2 + len(inner_channels). [1 for each 1X1 proection convolution] + [# inner convolutions].
         # - Use batchnorm and dropout as requested.
         # ====== YOUR CODE: ======
+<<<<<<< HEAD
+=======
+    
+        # Number of total conv layers is len(self.channels) = N
+        # We group them in chunks of size pool_every = P
+        # activation_class = ACTIVATIONS[self.activation_type]
+        # pool_class = POOLINGS[self.pooling_type]
+
+        # conv_layers_count = 0
+        # for out_channels in self.channels:
+        #     layers.append(nn.Conv2d(in_channels, out_channels, **self.conv_params))
+        #     layers.append(activation_class(**self.activation_params))
+
+        #     in_channels = out_channels
+        #     conv_layers_count += 1
+
+        #     if conv_layers_count % self.pool_every == 0:
+        #         layers.append(pool_class(**self.pooling_params))
+
+
+        # # -----------------------------
+        # N = len(self.channels)
+        # P = self.pool_every
+        # pool_class = POOLINGS[self.pooling_type]
+        # activation_class = ACTIVATIONS[self.activation_type]
+
+        # num_full_blocks = N // P  # How many full P-groups
+        # remainder = N % P         # Leftover conv layers if not divisible
+    
+        # # We'll keep an index to slice the list of channels
+        # current_idx = 0
+    
+        # # Build each full block of size P
+        # for block_idx in range(num_full_blocks):
+        #     block_channels = self.channels[current_idx : current_idx + P]
+        #     current_idx += P
+    
+        #     # Decide if we should use a bottleneck block
+        #     # Condition: self.bottleneck == True AND in_channels == block_channels[-1]
+        #     if self.bottleneck and in_channels == block_channels[-1]:
+        #         # Use a ResidualBottleneckBlock
+        #         #  - For a bottleneck, we pass in_out_channels=in_channels
+        #         #  - The "inner_channels" are block_channels[:-1]
+        #         #  - The "inner_kernel_sizes" can be [3] * (P-1)
+        #         layers.append(
+        #             ResidualBottleneckBlock(
+        #                 in_out_channels=in_channels,
+        #                 inner_channels=block_channels[:-1],
+        #                 inner_kernel_sizes=[3] * (len(block_channels) - 1),
+        #                 batchnorm=self.batchnorm,
+        #                 dropout=self.dropout,
+        #                 activation_type=self.activation_type
+        #             )
+        #         )
+        #     else:
+        #         # Use a regular ResidualBlock
+        #         layers.append(
+        #             ResidualBlock(
+        #                 in_channels=in_channels,
+        #                 channels=block_channels,
+        #                 kernel_sizes=[3] * len(block_channels),
+        #                 batchnorm=self.batchnorm,
+        #                 dropout=self.dropout,
+        #                 activation_type=self.activation_type
+        #             )
+        #         )
+    
+        #     # After building the block, the new 'in_channels' is the last channel in block_channels
+        #     in_channels = block_channels[-1]
+        #     # layers.append(activation_class(**self.activation_params))
+        #     # Add the pooling layer after each full block
+        #     layers.append(pool_class(**self.pooling_params))
+    
+        # # If there are leftover conv layers (N % P != 0), make one last block (no pooling after)
+        # if remainder > 0:
+        #     leftover_channels = self.channels[-remainder:]  # the last leftover channels
+            
+        #     # Check if we can use bottleneck
+        #     if self.bottleneck and len(leftover_channels) >= 3 and in_channels == leftover_channels[-1]:
+        #         layers.append(
+        #             ResidualBottleneckBlock(
+        #                 in_out_channels=in_channels,
+        #                 inner_channels=leftover_channels[:-1],
+        #                 inner_kernel_sizes=[3] * (len(leftover_channels) - 2),  # Inner convolutions
+        #                 batchnorm=self.batchnorm,
+        #                 dropout=self.dropout,
+        #                 activation_type=self.activation_type
+        #             )
+        #         )
+        #     else:
+        #         layers.append(
+        #             ResidualBlock(
+        #                 in_channels=in_channels,
+        #                 channels=leftover_channels,
+        #                 kernel_sizes=[3] * len(leftover_channels),
+        #                 batchnorm=self.batchnorm,
+        #                 dropout=self.dropout,
+        #                 activation_type=self.activation_type
+        #             )
+        #         )
+        #     # Update in_channels for completeness
+        #     in_channels = leftover_channels[-1]
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
 
         N = len(self.channels)
         P = self.pool_every
         pool_class = POOLINGS[self.pooling_type]
+<<<<<<< HEAD
         num_full_blocks = N // P
+=======
+    
+        # Сколько "полных" блоков по P слоёв
+        num_full_blocks = N // P
+        # Сколько слоёв останется "в хвосте"
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
         remainder = N % P
         
         current_idx = 0
     
+<<<<<<< HEAD
         for _ in range(num_full_blocks):
             block_channels = self.channels[current_idx : current_idx + P]
             current_idx += P
             
             if self.bottleneck and in_channels == block_channels[-1]:
+=======
+        # 1) Собираем все "полные" блоки
+        for _ in range(num_full_blocks):
+            # Берём кусок размером P
+            block_channels = self.channels[current_idx : current_idx + P]
+            current_idx += P
+            
+            # Проверяем, делать ли bottleneck
+            if self.bottleneck and in_channels == block_channels[-1]:
+                # Bottleneck-блок
+                #   in_out_channels = in_channels
+                #   inner_channels  = block_channels[:-1]
+                #   inner_kernel_sizes = [3]*(P-1)
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
                 layers.append(
                     ResidualBottleneckBlock(
                         in_out_channels=in_channels,
@@ -370,6 +499,10 @@ class ResNet(CNN):
                     )
                 )
             else:
+<<<<<<< HEAD
+=======
+                # Обычный ResidualBlock
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
                 layers.append(
                     ResidualBlock(
                         in_channels=in_channels,
@@ -381,12 +514,25 @@ class ResNet(CNN):
                     )
                 )
     
+<<<<<<< HEAD
             in_channels = block_channels[-1]
     
             layers.append(pool_class(**self.pooling_params))
     
         if remainder > 0:
             leftover_channels = self.channels[-remainder:]
+=======
+            # Обновляем in_channels
+            in_channels = block_channels[-1]
+    
+            # После полного блока --> Pool
+            layers.append(pool_class(**self.pooling_params))
+    
+        # 2) Если есть leftover, делаем ещё один блок (без pooling после)
+        if remainder > 0:
+            leftover_channels = self.channels[-remainder:]  # последний кусок
+            # Снова проверяем, нужно ли bottleneck
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
             if self.bottleneck and in_channels == leftover_channels[-1]:
                 layers.append(
                     ResidualBottleneckBlock(
@@ -409,6 +555,10 @@ class ResNet(CNN):
                         activation_type=self.activation_type
                     )
                 )
+<<<<<<< HEAD
+=======
+            # Обновляем in_channels
+>>>>>>> 61d4e0076d1e55b07ced8962e26363b991367780
             in_channels = leftover_channels[-1]
             
         # ========================
