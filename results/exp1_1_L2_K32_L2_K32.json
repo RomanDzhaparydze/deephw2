@@ -1,0 +1,61 @@
+{
+  "config": {
+    "run_name": "exp1_1_L2_K32",
+    "out_dir": "./results",
+    "seed": 42,
+    "device": null,
+    "bs_train": 128,
+    "bs_test": 32,
+    "batches": 100,
+    "epochs": 3,
+    "early_stopping": 3,
+    "checkpoints": null,
+    "lr": 0.001,
+    "reg": 0.001,
+    "filters_per_layer": [
+      32
+    ],
+    "pool_every": 2,
+    "hidden_dims": [
+      1024
+    ],
+    "model_type": "cnn",
+    "activation_type": "tanh",
+    "activation_params": {},
+    "conv_params": {
+      "kernel_size": 3,
+      "stride": 1,
+      "padding": 1
+    },
+    "pooling_type": "max",
+    "pooling_params": {
+      "kernel_size": 2,
+      "stride": 2
+    },
+    "kw": {},
+    "layers_per_block": 2
+  },
+  "results": {
+    "num_epochs": 3,
+    "train_loss": [
+      1.8873690831661225,
+      1.5756483733654023,
+      1.4575562238693238
+    ],
+    "train_acc": [
+      34.7578125,
+      44.3046875,
+      48.578125
+    ],
+    "test_loss": [
+      1.6327905881404876,
+      1.5137978303432464,
+      1.479516841173172
+    ],
+    "test_acc": [
+      42.9375,
+      46.0,
+      47.375
+    ]
+  }
+}
